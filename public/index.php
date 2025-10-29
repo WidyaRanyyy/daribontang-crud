@@ -5,27 +5,40 @@ $limit = 5;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-$search = $_GET['search'] ?? '';
+$search = trim($_GET['search'] ?? '');
 $where = '';
 $params = [];
 
+// Hanya tambahkan WHERE jika ada pencarian
 if ($search !== '') {
-    $where = "WHERE name LIKE :search OR location LIKE :search";
-    $params[':search'] = '%' . $search . '%';
+    $where = "WHERE name LIKE ? OR location LIKE ?";
+    $searchParam = '%' . $search . '%';
 }
 
-$countStmt = $pdo->prepare("SELECT COUNT(*) FROM destinations $where");
-$countStmt->execute($params);
+// 1. HITUNG TOTAL DATA
+$countSql = "SELECT COUNT(*) FROM destinations $where";
+$countStmt = $pdo->prepare($countSql);
+
+// Bind parameter hanya jika ada
+if ($search !== '') {
+    $countStmt->execute([$searchParam, $searchParam]);
+} else {
+    $countStmt->execute();
+}
 $total = $countStmt->fetchColumn();
 $pages = ceil($total / $limit);
 
-$stmt = $pdo->prepare("SELECT * FROM destinations $where ORDER BY created_at DESC LIMIT :limit OFFSET :offset");
-$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-foreach ($params as $key => $val) {
-    $stmt->bindValue($key, $val);
+// 2. AMBIL DATA
+$dataSql = "SELECT * FROM destinations $where ORDER BY created_at DESC LIMIT ? OFFSET ?";
+$stmt = $pdo->prepare($dataSql);
+
+// Bind parameters berdasarkan kondisi
+if ($search !== '') {
+    $stmt->execute([$searchParam, $searchParam, $limit, $offset]);
+} else {
+    $stmt->execute([$limit, $offset]);
 }
-$stmt->execute();
+
 $destinations = $stmt->fetchAll();
 ?>
 
@@ -70,37 +83,49 @@ $destinations = $stmt->fetchAll();
             </div>
         <?php endif; ?>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Nama</th>
-                    <th>Lokasi</th>
-                    <th>Harga Tiket</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (count($destinations) > 0): ?>
-                    <?php foreach ($destinations as $i => $d): ?>
-                        <tr>
-                            <td><?= $offset + $i + 1 ?></td>
-                            <td><?= htmlspecialchars($d['name']) ?></td>
-                            <td><?= htmlspecialchars($d['location']) ?></td>
-                            <td>Rp <?= number_format($d['ticket_price'], 0, ',', '.') ?></td>
-                            <td>
-                                <a href="detail.php?id=<?= $d['id'] ?>" class="btn btn-detail">Detail</a>
-                                <a href="edit.php?id=<?= $d['id'] ?>" class="btn btn-edit">Edit</a>
-                                <a href="delete.php?id=<?= $d['id'] ?>" class="btn btn-delete" onclick="return confirm('Yakin hapus <?= htmlspecialchars($d['name']) ?>?')">Hapus</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr><td colspan="5" class="no-data">Tidak ada data.</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+        <?php if ($search !== ''): ?>
+            <p class="search-result">
+                Menampilkan hasil untuk: <strong>"<?= htmlspecialchars($search) ?>"</strong> 
+                (<?= $total ?> ditemukan)
+            </p>
+        <?php endif; ?>
 
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama</th>
+                        <th>Lokasi</th>
+                        <th>Harga Tiket</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (count($destinations) > 0): ?>
+                        <?php foreach ($destinations as $i => $d): ?>
+                            <tr>
+                                <td><?= $offset + $i + 1 ?></td>
+                                <td><?= htmlspecialchars($d['name']) ?></td>
+                                <td><?= htmlspecialchars($d['location']) ?></td>
+                                <td>Rp <?= number_format($d['ticket_price'], 0, ',', '.') ?></td>
+                                <td>
+                                    <a href="detail.php?id=<?= $d['id'] ?>" class="btn btn-detail">Detail</a>
+                                    <a href="edit.php?id=<?= $d['id'] ?>" class="btn btn-edit">Edit</a>
+                                    <a href="delete.php?id=<?= $d['id'] ?>" class="btn btn-delete" onclick="return confirm('Yakin hapus <?= addslashes(htmlspecialchars($d['name'])) ?>?')">Hapus</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr><td colspan="5" class="no-data">
+                            <?= $search !== '' ? 'Tidak ada hasil pencarian.' : 'Tidak ada data.' ?>
+                        </td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
         <div class="pagination">
             <?php if ($page > 1): ?>
                 <a href="?page=<?= $page-1 ?>&search=<?= urlencode($search) ?>">&laquo; Sebelumnya</a>
@@ -116,7 +141,6 @@ $destinations = $stmt->fetchAll();
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <p>2409106011 Widya Ayu Anggraini</p>
     </footer>
