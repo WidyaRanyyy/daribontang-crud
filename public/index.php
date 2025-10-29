@@ -5,14 +5,26 @@ $limit = 5;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-$countStmt = $pdo->prepare("SELECT COUNT(*) FROM destinations");
-$countStmt->execute();
+$search = $_GET['search'] ?? '';
+$where = '';
+$params = [];
+
+if ($search !== '') {
+    $where = "WHERE name LIKE :search OR location LIKE :search";
+    $params[':search'] = '%' . $search . '%';
+}
+
+$countStmt = $pdo->prepare("SELECT COUNT(*) FROM destinations $where");
+$countStmt->execute($params);
 $total = $countStmt->fetchColumn();
 $pages = ceil($total / $limit);
 
-$stmt = $pdo->prepare("SELECT * FROM destinations ORDER BY created_at DESC LIMIT :limit OFFSET :offset");
+$stmt = $pdo->prepare("SELECT * FROM destinations $where ORDER BY created_at DESC LIMIT :limit OFFSET :offset");
 $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+foreach ($params as $key => $val) {
+    $stmt->bindValue($key, $val);
+}
 $stmt->execute();
 $destinations = $stmt->fetchAll();
 ?>
@@ -45,6 +57,12 @@ $destinations = $stmt->fetchAll();
         </div>
 
         <a href="create.php" class="btn btn-primary">+ Tambah Destinasi</a>
+
+        <!-- Search Form -->
+        <form method="GET" class="search-form">
+            <input type="text" name="search" placeholder="Cari nama atau lokasi..." value="<?= htmlspecialchars($search) ?>">
+            <button type="submit">Cari</button>
+        </form>
 
         <?php if (isset($_GET['msg'])): ?>
             <div class="alert alert-<?= $_GET['status'] ?? 'success' ?>">
@@ -85,15 +103,15 @@ $destinations = $stmt->fetchAll();
 
         <div class="pagination">
             <?php if ($page > 1): ?>
-                <a href="?page=<?= $page - 1 ?>">&laquo; Sebelumnya</a>
+                <a href="?page=<?= $page-1 ?>&search=<?= urlencode($search) ?>">&laquo; Sebelumnya</a>
             <?php endif; ?>
 
             <?php for ($i = 1; $i <= $pages; $i++): ?>
-                <a href="?page=<?= $i ?>" <?= $i == $page ? 'class="active"' : '' ?>><?= $i ?></a>
+                <a href="?page=<?= $i ?>&search=<?= urlencode($search) ?>" <?= $i == $page ? 'class="active"' : '' ?>><?= $i ?></a>
             <?php endfor; ?>
 
             <?php if ($page < $pages): ?>
-                <a href="?page=<?= $page + 1 ?>">Berikutnya &raquo;</a>
+                <a href="?page=<?= $page+1 ?>&search=<?= urlencode($search) ?>">Berikutnya &raquo;</a>
             <?php endif; ?>
         </div>
     </div>
