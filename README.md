@@ -15,8 +15,6 @@ Aplikasi ini mengimplementasikan fitur-fitur dasar CRUD sesuai dengan spesifikas
   * **Validasi & Sanitasi**: Implementasi sanitasi data menggunakan *Prepared Statements* (PDO) untuk menghindari SQL Injection, dan penggunaan `htmlspecialchars()` untuk mencegah XSS.
   * **Pesan Informatif**: Menampilkan pesan sukses atau error yang informatif setelah operasi CRUD (`index.php`, `create.php`, `edit.php`).
 
-*(**Catatan**: Fitur Pencarian belum diimplementasikan di kode yang disediakan, namun merupakan fitur wajib sesuai spesifikasi tugas.)*
-
 ## 🛠️ Kebutuhan Sistem
 
   * **Bahasa**: PHP Native (minimal versi 8.0)
