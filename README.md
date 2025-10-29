@@ -104,7 +104,7 @@ Struktur folder utama yang digunakan dalam proyek ini:
 
 ## 📸 Screenshot Aplikasi
 1. Tampilan Awal
-<img width="829" height="368" alt="image" src="https://github.com/user-attachments/assets/aa13231d-159f-4cd0-b732-9c964494c2f4" />
+<img width="960" height="416" alt="image" src="https://github.com/user-attachments/assets/4e78fe6d-eda1-4e85-b3cb-8722f2ceb384" />
 
 2. Tambah Destinasi
 <img width="715" height="429" alt="image" src="https://github.com/user-attachments/assets/20135c87-4b51-4963-aecf-58ec747213ca" />
