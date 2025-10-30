@@ -1,262 +1,233 @@
-# 🏝️ Aplikasi Destinasi Wisata
+# 📦 DARIBONTANG-CRUD: Aplikasi Manajemen Data Khas Bontang
 
-Aplikasi web CRUD (Create, Read, Update, Delete) untuk mengelola data destinasi wisata. Dibangun dengan PHP Native dan MySQL, aplikasi ini memiliki antarmuka modern dan responsif untuk memudahkan pengelolaan informasi destinasi wisata favorit Anda.
+Aplikasi ini adalah implementasi sistem **CRUD (Create, Read, Update, Delete)** berbasis **PHP Native** dan **MySQL/MariaDB** yang aman (menggunakan **PDO Prepared Statements**) untuk mengelola data **produk, wisata, dan makanan khas** dari Kota Bontang.
 
-## ✨ Fitur Utama
+---
 
-✅ **Semua fitur wajib terpenuhi:**
+## 🌟 Fitur Utama yang Tersedia
 
-- ➕ **Create** - Form tambah destinasi dengan validasi server-side dan pesan sukses/gagal
-- 📋 **Read** - Tabel daftar destinasi, diurutkan berdasarkan `created_at DESC`
-- 👁️ **Read Detail** - Halaman detail lengkap untuk setiap destinasi
-- ✏️ **Update** - Form edit dengan data yang sudah terisi (prefill)
-- 🗑️ **Delete** - Tombol hapus dengan konfirmasi JavaScript
-- 🔍 **Pencarian** - Cari berdasarkan nama atau lokasi destinasi
-- 📄 **Pagination** - Navigasi data dengan 5 item per halaman
-- 🔒 **Validasi & Sanitasi** - Perlindungan dari SQL Injection dan XSS
-- ⚠️ **Error Handling** - Pesan error informatif tanpa stack trace
-- 🎨 **UI Modern & Responsif** - Antarmuka yang elegan dan mobile-friendly
+| Modul | Fitur | Keterangan |
+|--------|--------|-------------|
+| **Sistem** | Otentikasi (Login/Logout) | Akses Dashboard terbatas hanya untuk admin (Hardcoded: `admin` / `admin123`). |
+| **Sistem** | Halaman Publik (`index.php`) | Menampilkan informasi wisata dan produk dengan desain menarik (termasuk background video). |
+| **Produk** | CRUD Lengkap | Tambah, Lihat Detail, Edit, dan Hapus data produk (kerajinan, oleh-oleh). |
+| **Makanan** | CRUD Lengkap | Tambah, Lihat Detail, Edit, dan Hapus data makanan khas. |
+| **Wisata** | CRUD Lengkap | Tambah, Lihat Detail, Edit, dan Hapus data destinasi wisata. |
+| **Data** | Pagination | Pembatasan tampilan data per halaman (default 5 data per halaman). |
+| **Data** | Pencarian | Pencarian keyword pada kolom nama dan kategori/lokasi. |
+| **Keamanan** | Validasi & Sanitasi | Mencegah SQL Injection (dengan PDO) dan XSS (dengan `htmlspecialchars`). |
 
-## 💻 Kebutuhan Sistem
+---
 
-- **PHP** versi 8.0 atau lebih tinggi
-- **MySQL** versi 5.7 atau lebih tinggi / **MariaDB** 10.2+
-- **Web Server** (Apache/Nginx) - Bisa menggunakan XAMPP atau Laragon
-- **PDO Extension** (biasanya sudah terinstall di PHP)
-- Browser modern (Chrome, Firefox, Safari, Edge)
+## ⚙️ Kebutuhan Sistem
 
-## 📦 Cara Instalasi
+Aplikasi ini dirancang untuk berjalan di lingkungan server lokal:
 
-### 1. Clone atau Download Repository
+- **Server Web:** Apache (melalui XAMPP atau Laragon)  
+- **Bahasa Pemrograman:** PHP Native (minimal PHP 7.4)  
+- **Database:** MySQL atau MariaDB  
+- **Ekstensi PHP Wajib:** `pdo_mysql` *(biasanya aktif secara default)*  
 
-```bash
-git clone (https://github.com/WidyaRanyyy/travel-crud)
-cd TRAVEL-CRUD
-```
+---
 
-### 2. Setup Database
+## 📂 Struktur Folder Proyek
 
-Buat database baru di MySQL:
-
-```sql
-CREATE DATABASE destinasi_wisata;
-USE destinasi_wisata;
-
-CREATE TABLE destinations (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    location VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
-    ticket_price DECIMAL(10,2) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### 3. Konfigurasi Database
-
-Buat file `config/database.php` dengan konten berikut:
-
-```php
-<?php
-$host = 'localhost';
-$db   = 'destinasi_wisata';
-$user = 'root';
-$pass = '';
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
-
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (\PDOException $e) {
-    throw new \PDOException($e->getMessage(), (int)$e->getCode());
-}
-?>
-```
-
-**Sesuaikan kredensial database:**
-- `$host` - Host database (default: localhost)
-- `$db` - Nama database
-- `$user` - Username database
-- `$pass` - Password database
-
-### 4. Struktur Folder
+Struktur folder mencerminkan pemisahan antara file publik (yang dapat diakses langsung oleh browser) dan file konfigurasi:
 
 ```
-TRAVEL-CRUD/
-│
+
+DARIBONTANG-CRUD/
 ├── config/
-│   ├── .env                  # File environment (opsional)
-│   └── database.php          # Konfigurasi koneksi database
-│
-├── public/                   # Folder utama aplikasi
-│   ├── assets/
-│   │   └── style.css         # File CSS untuk styling
-│   │
-│   ├── about.php             # Halaman tentang aplikasi
-│   ├── create.php            # Halaman tambah destinasi
-│   ├── delete.php            # Proses hapus destinasi
-│   ├── detail.php            # Halaman detail destinasi
-│   ├── edit.php              # Halaman edit destinasi
-│   └── index.php             # Halaman utama (list destinasi)
-│
-├── database.sql              # File SQL untuk setup database
-└── README.md                 # Dokumentasi
+│   └── database.php      # Koneksi PDO ke Database
+├── foto/
+│   └── back.mp4          # File video background
+├── public/
+│   ├── food/             # File CRUD untuk Makanan Khas (add, detail, edit, delete)
+│   ├── product/          # File CRUD untuk Produk (add, detail, edit, delete)
+│   ├── tourism/          # File CRUD untuk Wisata (add, detail, edit, delete)
+│   ├── dashboard.php     # Halaman utama admin (CRUD, Pagination, Search)
+│   ├── login.php         # Halaman Login Admin
+│   └── logout.php        # Logika Logout
+├── index.php             # Halaman utama / Beranda publik
+├── script.js             # Logika Dark Mode, Search (Client-Side), dll.
+└── style.css             # Desain Utama Website
+
+````
+
+---
+
+## 🛠️ Panduan Instalasi dan Konfigurasi
+
+Ikuti langkah-langkah di bawah ini untuk menjalankan aplikasi di server lokal Anda (**XAMPP / Laragon**):
+
+### 🧩 Langkah 1: Kloning dan Penempatan File
+1. Tempatkan folder `DARIBONTANG-CRUD` ke dalam direktori server Anda:
+   - `htdocs` untuk XAMPP  
+   - `www` untuk Laragon  
+2. Pastikan **Apache** dan **MySQL** sudah berjalan.
+
+---
+
+### 🧩 Langkah 2: Konfigurasi Database (MySQL/MariaDB)
+
+1. Buat database baru bernama:
+   ```sql
+   CREATE DATABASE db_daribontang;
+````
+
+2. Buka file `config/database.php` dan sesuaikan kredensial koneksi:
+
+   ```php
+   define('DB_HOST', 'localhost');
+   define('DB_USER', 'root');
+   define('DB_PASS', ''); // Ganti jika MySQL Anda memiliki password
+   define('DB_NAME', 'db_daribontang'); // Pastikan nama ini sesuai
+   ```
+
+3. Jalankan script SQL berikut untuk membuat tabel yang dibutuhkan:
+
+   ```sql
+   -- 1. Tabel Users (untuk Login)
+   CREATE TABLE users (
+     id INT PRIMARY KEY AUTO_INCREMENT,
+     username VARCHAR(50) UNIQUE,
+     password VARCHAR(255)
+   );
+
+   INSERT INTO users (username, password) VALUES ('admin', 'admin123');
+
+   -- 2. Tabel Products
+   CREATE TABLE products (
+     id INT PRIMARY KEY AUTO_INCREMENT,
+     name VARCHAR(255),
+     category VARCHAR(100),
+     description TEXT,
+     stock INT,
+     price DECIMAL(10,2),
+     created_at DATETIME,
+     updated_at DATETIME
+   );
+
+   -- 3. Tabel Tourism
+   CREATE TABLE tourism (
+     id INT PRIMARY KEY AUTO_INCREMENT,
+     name VARCHAR(255),
+     location VARCHAR(255),
+     description TEXT,
+     rating DECIMAL(2,1),
+     price_range VARCHAR(50),
+     created_at DATETIME,
+     updated_at DATETIME
+   );
+   ```
+  --4. Tabel Food
+    CREATE TABLE IF NOT EXISTS foods (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        origin VARCHAR(100),
+        description TEXT,
+        price_range VARCHAR(50),
+        best_place VARCHAR(150),
+        rating DECIMAL(2,1) DEFAULT 4.0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+---
+
+### 🧩 Langkah 3: Akses Aplikasi
+
+| Akses                | URL                                                                                                      | Keterangan                              |
+| -------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| **Publik (Beranda)** | [http://localhost/DARIBONTANG-CRUD/index.php](http://localhost/DARIBONTANG-CRUD/index.php)               | Halaman depan untuk pengunjung          |
+| **Admin (Login)**    | [http://localhost/DARIBONTANG-CRUD/public/login.php](http://localhost/DARIBONTANG-CRUD/public/login.php) | Masuk ke Dashboard untuk mengelola data |
+
+---
+
+## 📝 Panduan Penggunaan Web (Cara Memakai Aplikasi)
+
+Berikut adalah langkah-langkah untuk mengakses dan mengelola konten di aplikasi:
+
+### 1️⃣ Login ke Dashboard
+
+* Akses halaman Login melalui URL:
+  [http://localhost/DARIBONTANG-CRUD/public/login.php](http://localhost/DARIBONTANG-CRUD/public/login.php)
+* Gunakan kredensial default:
+
+  * **Username:** `admin`
+  * **Password:** `admin123`
+* Setelah berhasil login, Anda akan diarahkan ke **Dashboard Admin (`dashboard.php`)**.
+
+---
+
+### 2️⃣ Mengelola Data Produk, Makanan dan Wisata (CRUD)
+
+Setelah login, Anda dapat beralih antara menu **Produk**, **Makanan** dan **Wisata** menggunakan navigasi di sidebar.
+
+#### 🔍 A. Fitur Read (Tampil Data)
+
+* Akses: Klik menu **Produk** (`dashboard.php?page=produk`) atau **Wisata** (`dashboard.php?page=wisata`) atau **Makanan Khas** (`dashboard.php?page=food`).
+* **Pencarian:** Gunakan kolom input “Cari berdasarkan nama/kategori…” untuk memfilter data.
+* **Pagination:** Navigasi di bawah tabel menampilkan maksimal 5 data per halaman.
+* **Detail:** Klik tombol **Detail** untuk melihat informasi lengkap setiap item.
+
+#### ➕ B. Fitur Create (Tambah Data)
+
+1. Klik tombol **+ Tambah Produk** atau **+ Tambah Wisata** atau **+ Tambah Makanan**.
+2. Isi semua kolom form yang diperlukan.
+3. Klik **Simpan Produk/Wisata/Makanan**.
+4. Jika berhasil, sistem akan menampilkan pesan sukses dan menampilkan data baru di tabel.
+
+#### ✏️ C. Fitur Update
+
+1. Klik tombol **Edit** pada data yang ingin diubah.
+2. Lakukan perubahan pada form yang muncul.
+3. Klik **Simpan Perubahan** untuk memperbarui data.
+
+#### ❌ D. Fitur Delete
+
+1. Klik tombol **Hapus** pada data yang ingin dihapus.
+2. Akan muncul konfirmasi penghapusan.
+3. Klik **OK** untuk menghapus data secara permanen.
+
+---
+
+### 🚪 3️⃣ Logout
+
+* Klik menu **Logout** pada pojok atas Dashboard untuk keluar dari sistem.
+* Anda akan diarahkan kembali ke halaman **Login**.
+
+---
+
+## 🖼️ Tampilan Aplikasi
+
+### Beranda:
+
+<img width="960" height="449" alt="image" src="https://github.com/user-attachments/assets/ea434d4e-cfdd-4bb5-aa34-66485dbfe3a5" />
+
+### Login:
+
+<img width="960" height="445" alt="image" src="https://github.com/user-attachments/assets/abfac8f5-be07-437f-b00c-fbe3ec33eeab" />
+
+### Dashboard Admin (Produk):
+
+<img width="960" height="444" alt="image" src="https://github.com/user-attachments/assets/3824259e-cc35-4811-b32a-7932d4f45e8d" />
+
+---
+
+## 🔒 Akses Admin
+
+| Username | Password   |
+| -------- | ---------- |
+| `admin`  | `admin123` |
+
+---
+
+## 📜 Lisensi
+
+Aplikasi ini dikembangkan untuk tujuan **pembelajaran dan tugas akademik**.
+Bebas dimodifikasi dan dikembangkan sesuai kebutuhan.
+
+---
+
 ```
 
-### 5. Jalankan Aplikasi
-
-Jika menggunakan XAMPP/WAMP:
-1. Letakkan folder project di `htdocs` (XAMPP) atau `www` (WAMP)
-2. Akses melalui browser: `http://localhost/TRAVEL-CRUD/public/`
-
-Jika menggunakan PHP Built-in Server:
-```bash
-cd public
-php -S localhost:8000
-```
-Akses: `http://localhost:8000`
-
-## 🎯 Contoh Environment Config
-
-Buat file `.env` atau `config/database.php` dengan template:
-
-```php
-<?php
-// Konfigurasi Database
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'destinasi_wisata');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_CHARSET', 'utf8mb4');
-
-// Pengaturan Aplikasi
-define('BASE_URL', 'http://localhost/TRAVEL-CRUD/public/');
-define('APP_NAME', 'Destinasi Wisata');
-define('ITEMS_PER_PAGE', 5);
-
-// Koneksi Database
-$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=".DB_CHARSET;
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
-
-try {
-    $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-} catch (\PDOException $e) {
-    die("Koneksi database gagal: " . $e->getMessage());
-}
-?>
-```
-
-## 📸 Screenshot Aplikasi
-
-1. Beranda
-<img width="960" height="439" alt="image" src="https://github.com/user-attachments/assets/d5730224-0b4e-48df-b495-fb65c0000010" />
-
-2. Tambah Destinasi
-<img width="435" height="382" alt="image" src="https://github.com/user-attachments/assets/189723db-cee4-433b-8475-3c05a754f16b" />
-
-3. Edit Destinasi
-<img width="258" height="364" alt="image" src="https://github.com/user-attachments/assets/a9ad4235-c1d1-4f88-aaf4-3e570e5643d8" />
-
-4. Detail Destinasi
-<img width="320" height="345" alt="image" src="https://github.com/user-attachments/assets/985ef29e-059a-4376-897d-bd5719f0938e" />
-
-5. Tentang Aplikasi
-<img width="787" height="383" alt="image" src="https://github.com/user-attachments/assets/90f70f4d-f86e-4d44-9bce-ca6459bfd87d" />
-
-
-
-### Halaman Utama (List Destinasi)
-```
-┌─────────────────────────────────────────────────────┐
-│  Destinasi Wisata    [Beranda] [Tambah] [Tentang]  │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  Destinasi Wisata                                   │
-│  Kelola destinasi favorit Anda dengan mudah        │
-│                                                     │
-│  [+ Tambah Destinasi]                              │
-│                                                     │
-│  [Cari nama atau lokasi...] [Cari]                 │
-│                                                     │
-│  ┌───────────────────────────────────────────────┐ │
-│  │ No │ Nama        │ Lokasi      │ Harga │ Aksi│ │
-│  ├────┼─────────────┼─────────────┼───────┼─────┤ │
-│  │ 1  │ Pantai Kuta │ Bali        │ 25000 │ ... │ │
-│  │ 2  │ Borobudur   │ Yogyakarta  │ 50000 │ ... │ │
-│  └───────────────────────────────────────────────┘ │
-│                                                     │
-│  [« Sebelumnya] [1] [2] [3] [Berikutnya »]        │
-│                                                     │
-└─────────────────────────────────────────────────────┘
-```
-
-### Halaman Tambah/Edit Destinasi
-```
-┌─────────────────────────────────────────────────────┐
-│  Tambah Destinasi Wisata                            │
-│  Isi semua kolom dengan benar                       │
-│                                                     │
-│  ← Kembali ke Daftar                               │
-│                                                     │
-│  Nama Destinasi: [________________]                 │
-│  Lokasi:         [________________]                 │
-│  Deskripsi:      [________________]                 │
-│                  [________________]                 │
-│  Harga Tiket:    [________] Rp                     │
-│                                                     │
-│  [Simpan Destinasi]                                │
-└─────────────────────────────────────────────────────┘
-```
-
-## 🛠️ Teknologi yang Digunakan
-
-- **Backend:** PHP 8.0+ Native (tanpa framework/ORM)
-- **Database:** MySQL/MariaDB dengan PDO
-- **Frontend:** HTML5, CSS3
-- **Design:** Modern UI dengan CSS Grid & Flexbox
-- **Security:** Prepared Statements (PDO), htmlspecialchars() untuk XSS protection
-
-## 👨‍💻 Developer
-
-**Widya Ayu Anggraini**  
-NIM: 2409106011
-
-Dikembangkan sebagai latihan dalam membangun aplikasi CRUD dinamis berbasis web dengan PHP Native.
-
-## 📝 Lisensi
-
-Aplikasi ini dibuat untuk keperluan edukasi dan pembelajaran.
-
-## 🐛 Troubleshooting
-
-### Error: Connection refused
-- Pastikan MySQL service sudah berjalan
-- Cek kredensial database di `config/database.php`
-
-### Error: 404 Not Found
-- Pastikan path URL sesuai dengan lokasi folder
-- Gunakan `http://localhost/nama-folder/public/` bukan `http://localhost/nama-folder/`
-
-### Error: Function not found
-- Pastikan PHP PDO extension sudah aktif
-- Cek `php.ini` dan uncomment `extension=pdo_mysql`
-
-### Error: CSS tidak muncul
-- Periksa path file `assets/style.css`
-- Pastikan file CSS berada di folder `public/assets/`
-
-
-
-**Selamat menggunakan Aplikasi Destinasi Wisata! 🎉**
-
-
+--- 
