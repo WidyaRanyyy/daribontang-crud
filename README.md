@@ -2,6 +2,8 @@
 
 Aplikasi ini merupakan implementasi sistem **CRUD (Create, Read, Update, Delete)** berbasis **PHP Native** dan **MySQL/MariaDB** yang aman menggunakan **PDO Prepared Statements**.  
 
+## TAHAP PENGEMBANGAN : CRUD ADA DI PRODUK, WISATA, DAN MAKANAN SETELAH DASHBOARD ADMIN
+---
 Login hanya bisa menggunakan akun admin dengan password admin 123.
 Yang dalam tahap pengembangan : **Akun, Profile, Beranda didashboard, Pengaturan, dan yang lainnya**.
 Digunakan untuk mengelola data **produk, wisata, dan makanan khas** dari Kota Bontang.
