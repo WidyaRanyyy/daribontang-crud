@@ -1,120 +1,262 @@
-# 🏝️ Web CRUD Destinasi Wisata dengan PHP Native
+# 🏝️ Aplikasi Destinasi Wisata
 
-Aplikasi CRUD sederhana (Create, Read, Update, Delete) untuk mengelola data destinasi wisata menggunakan **PHP Native** dan koneksi database **PDO**.
+Aplikasi web CRUD (Create, Read, Update, Delete) untuk mengelola data destinasi wisata. Dibangun dengan PHP Native dan MySQL, aplikasi ini memiliki antarmuka modern dan responsif untuk memudahkan pengelolaan informasi destinasi wisata favorit Anda.
 
-## 🚀 Fitur Utama
+## ✨ Fitur Utama
 
-Aplikasi ini mengimplementasikan fitur-fitur dasar CRUD sesuai dengan spesifikasi tugas:
+✅ **Semua fitur wajib terpenuhi:**
 
-  * **Create (Tambah Data)**: Form untuk menambah data destinasi baru dengan validasi sisi server (`create.php`).
-  * **Read (Daftar Data)**: Halaman utama menampilkan daftar destinasi dalam bentuk tabel, diurutkan berdasarkan `created_at` secara *descending* (`index.php`).
-      * **Pagination**: Daftar data dibatasi **5 data per halaman** (`index.php`).
-  * **Read Detail**: Halaman untuk melihat informasi lengkap setiap destinasi (`detail.php`).
-  * **Update (Edit Data)**: Form untuk mengubah data destinasi dengan *prefill* data lama (`edit.php`).
-  * **Delete (Hapus Data)**: Tombol hapus dengan konfirmasi *prompt* (`delete.php`).
-  * **Validasi & Sanitasi**: Implementasi sanitasi data menggunakan *Prepared Statements* (PDO) untuk menghindari SQL Injection, dan penggunaan `htmlspecialchars()` untuk mencegah XSS.
-  * **Pesan Informatif**: Menampilkan pesan sukses atau error yang informatif setelah operasi CRUD (`index.php`, `create.php`, `edit.php`).
+- ➕ **Create** - Form tambah destinasi dengan validasi server-side dan pesan sukses/gagal
+- 📋 **Read** - Tabel daftar destinasi, diurutkan berdasarkan `created_at DESC`
+- 👁️ **Read Detail** - Halaman detail lengkap untuk setiap destinasi
+- ✏️ **Update** - Form edit dengan data yang sudah terisi (prefill)
+- 🗑️ **Delete** - Tombol hapus dengan konfirmasi JavaScript
+- 🔍 **Pencarian** - Cari berdasarkan nama atau lokasi destinasi
+- 📄 **Pagination** - Navigasi data dengan 5 item per halaman
+- 🔒 **Validasi & Sanitasi** - Perlindungan dari SQL Injection dan XSS
+- ⚠️ **Error Handling** - Pesan error informatif tanpa stack trace
+- 🎨 **UI Modern & Responsif** - Antarmuka yang elegan dan mobile-friendly
 
-## 🛠️ Kebutuhan Sistem
+## 💻 Kebutuhan Sistem
 
-  * **Bahasa**: PHP Native (minimal versi 8.0)
-  * **Database**: MySQL atau MariaDB
-  * **Web Server**: Server lokal (misalnya XAMPP, Laragon, atau sejenisnya)
-  * **Koneksi Database**: Wajib menggunakan PDO.
+- **PHP** versi 8.0 atau lebih tinggi
+- **MySQL** versi 5.7 atau lebih tinggi / **MariaDB** 10.2+
+- **Web Server** (Apache/Nginx) - Bisa menggunakan XAMPP atau Laragon
+- **PDO Extension** (biasanya sudah terinstall di PHP)
+- Browser modern (Chrome, Firefox, Safari, Edge)
 
-## ⚙️ Cara Instalasi dan Konfigurasi
+## 📦 Cara Instalasi
 
-1.  **Clone Repository**:
+### 1. Clone atau Download Repository
 
-    ```bash
-    git clone (https://github.com/WidyaRanyyy/travel-crud)
-    ```
+```bash
+git clone (https://github.com/WidyaRanyyy/travel-crud)
+cd TRAVEL-CRUD
+```
 
-2.  **Siapkan Database**:
+### 2. Setup Database
 
-      * Buat database baru (misalnya: `db_wisata`).
-      * Buat tabel `destinations` dengan struktur kurang lebih seperti berikut:
+Buat database baru di MySQL:
 
-    <!-- end list -->
+```sql
+CREATE DATABASE destinasi_wisata;
+USE destinasi_wisata;
 
-    ```sql
-    CREATE TABLE destinations (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        location VARCHAR(255) NOT NULL,
-        description TEXT,
-        ticket_price DECIMAL(10, 2) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    ```
+CREATE TABLE destinations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    ticket_price DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
-3.  **Konfigurasi Koneksi Database**:
+### 3. Konfigurasi Database
 
-      * Buat file koneksi database (misalnya: `config/database.php`).
-      * Isi dengan konfigurasi PDO Anda.
+Buat file `config/database.php` dengan konten berikut:
 
-    **Contoh `config/database.php`:**
+```php
+<?php
+$host = 'localhost';
+$db   = 'destinasi_wisata';
+$user = 'root';
+$pass = '';
+$charset = 'utf8mb4';
 
-    ```php
-    <?php
-    $host = 'localhost';
-    $db   = 'db_wisata';
-    $user = 'root'; // Ganti dengan user database Anda
-    $pass = ''; // Ganti dengan password database Anda
-    $charset = 'utf8mb4';
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
 
-    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
-    ];
+try {
+    $pdo = new PDO($dsn, $user, $pass, $options);
+} catch (\PDOException $e) {
+    throw new \PDOException($e->getMessage(), (int)$e->getCode());
+}
+?>
+```
 
-    try {
-        $pdo = new PDO($dsn, $user, $pass, $options);
-    } catch (\PDOException $e) {
-        // Pesan error informatif, tanpa menampilkan stack trace
-        die("Koneksi database gagal: " . $e->getMessage()); 
-    }
-    ```
+**Sesuaikan kredensial database:**
+- `$host` - Host database (default: localhost)
+- `$db` - Nama database
+- `$user` - Username database
+- `$pass` - Password database
 
-4.  **Akses Aplikasi**:
-
-      * Jalankan server lokal Anda.
-      * Akses aplikasi melalui *browser* ke direktori proyek (`http://localhost/[FOLDER_PROYEK]/destinations/index.php`).
-
-## 📁 Struktur Folder
-
-Struktur folder utama yang digunakan dalam proyek ini:
+### 4. Struktur Folder
 
 ```
-.
+TRAVEL-CRUD/
+│
 ├── config/
-│   └── database.php  # Konfigurasi koneksi PDO
-├── destinations/
+│   ├── .env                  # File environment (opsional)
+│   └── database.php          # Konfigurasi koneksi database
+│
+├── public/                   # Folder utama aplikasi
 │   ├── assets/
-│   │   └── style.css # File CSS (Diasumsikan ada)
-│   ├── create.php    # Logika dan tampilan tambah data
-│   ├── detail.php    # Logika dan tampilan detail data
-│   ├── delete.php    # Logika hapus data
-│   ├── edit.php      # Logika dan tampilan edit data
-│   └── index.php     # Logika dan tampilan daftar data (Read)
-└── README.md         # File ini
+│   │   └── style.css         # File CSS untuk styling
+│   │
+│   ├── about.php             # Halaman tentang aplikasi
+│   ├── create.php            # Halaman tambah destinasi
+│   ├── delete.php            # Proses hapus destinasi
+│   ├── detail.php            # Halaman detail destinasi
+│   ├── edit.php              # Halaman edit destinasi
+│   └── index.php             # Halaman utama (list destinasi)
+│
+├── database.sql              # File SQL untuk setup database
+└── README.md                 # Dokumentasi
+```
+
+### 5. Jalankan Aplikasi
+
+Jika menggunakan XAMPP/WAMP:
+1. Letakkan folder project di `htdocs` (XAMPP) atau `www` (WAMP)
+2. Akses melalui browser: `http://localhost/TRAVEL-CRUD/public/`
+
+Jika menggunakan PHP Built-in Server:
+```bash
+cd public
+php -S localhost:8000
+```
+Akses: `http://localhost:8000`
+
+## 🎯 Contoh Environment Config
+
+Buat file `.env` atau `config/database.php` dengan template:
+
+```php
+<?php
+// Konfigurasi Database
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'destinasi_wisata');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_CHARSET', 'utf8mb4');
+
+// Pengaturan Aplikasi
+define('BASE_URL', 'http://localhost/TRAVEL-CRUD/public/');
+define('APP_NAME', 'Destinasi Wisata');
+define('ITEMS_PER_PAGE', 5);
+
+// Koneksi Database
+$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=".DB_CHARSET;
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
+
+try {
+    $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+} catch (\PDOException $e) {
+    die("Koneksi database gagal: " . $e->getMessage());
+}
+?>
 ```
 
 ## 📸 Screenshot Aplikasi
-1. Tampilan Awal
-<img width="960" height="416" alt="image" src="https://github.com/user-attachments/assets/4e78fe6d-eda1-4e85-b3cb-8722f2ceb384" />
+
+1. Beranda
+<img width="960" height="439" alt="image" src="https://github.com/user-attachments/assets/d5730224-0b4e-48df-b495-fb65c0000010" />
 
 2. Tambah Destinasi
-<img width="715" height="429" alt="image" src="https://github.com/user-attachments/assets/20135c87-4b51-4963-aecf-58ec747213ca" />
+<img width="435" height="382" alt="image" src="https://github.com/user-attachments/assets/189723db-cee4-433b-8475-3c05a754f16b" />
 
 3. Edit Destinasi
-<img width="697" height="432" alt="image" src="https://github.com/user-attachments/assets/9c00c88b-aaa2-43f5-8c5c-d0266c547fef" />
+<img width="258" height="364" alt="image" src="https://github.com/user-attachments/assets/a9ad4235-c1d1-4f88-aaf4-3e570e5643d8" />
 
 4. Detail Destinasi
-<img width="713" height="318" alt="image" src="https://github.com/user-attachments/assets/ed489038-06d0-4376-ab05-a24023de5c63" />
+<img width="320" height="345" alt="image" src="https://github.com/user-attachments/assets/985ef29e-059a-4376-897d-bd5719f0938e" />
 
-5. Tentang
-<img width="740" height="408" alt="image" src="https://github.com/user-attachments/assets/86b8af9c-571d-45dd-a9c3-f3b3c6c8bd3d" />
+5. Tentang Aplikasi
+<img width="787" height="383" alt="image" src="https://github.com/user-attachments/assets/90f70f4d-f86e-4d44-9bce-ca6459bfd87d" />
+
+
+
+### Halaman Utama (List Destinasi)
+```
+┌─────────────────────────────────────────────────────┐
+│  Destinasi Wisata    [Beranda] [Tambah] [Tentang]  │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  Destinasi Wisata                                   │
+│  Kelola destinasi favorit Anda dengan mudah        │
+│                                                     │
+│  [+ Tambah Destinasi]                              │
+│                                                     │
+│  [Cari nama atau lokasi...] [Cari]                 │
+│                                                     │
+│  ┌───────────────────────────────────────────────┐ │
+│  │ No │ Nama        │ Lokasi      │ Harga │ Aksi│ │
+│  ├────┼─────────────┼─────────────┼───────┼─────┤ │
+│  │ 1  │ Pantai Kuta │ Bali        │ 25000 │ ... │ │
+│  │ 2  │ Borobudur   │ Yogyakarta  │ 50000 │ ... │ │
+│  └───────────────────────────────────────────────┘ │
+│                                                     │
+│  [« Sebelumnya] [1] [2] [3] [Berikutnya »]        │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+### Halaman Tambah/Edit Destinasi
+```
+┌─────────────────────────────────────────────────────┐
+│  Tambah Destinasi Wisata                            │
+│  Isi semua kolom dengan benar                       │
+│                                                     │
+│  ← Kembali ke Daftar                               │
+│                                                     │
+│  Nama Destinasi: [________________]                 │
+│  Lokasi:         [________________]                 │
+│  Deskripsi:      [________________]                 │
+│                  [________________]                 │
+│  Harga Tiket:    [________] Rp                     │
+│                                                     │
+│  [Simpan Destinasi]                                │
+└─────────────────────────────────────────────────────┘
+```
+
+## 🛠️ Teknologi yang Digunakan
+
+- **Backend:** PHP 8.0+ Native (tanpa framework/ORM)
+- **Database:** MySQL/MariaDB dengan PDO
+- **Frontend:** HTML5, CSS3
+- **Design:** Modern UI dengan CSS Grid & Flexbox
+- **Security:** Prepared Statements (PDO), htmlspecialchars() untuk XSS protection
+
+## 👨‍💻 Developer
+
+**Widya Ayu Anggraini**  
+NIM: 2409106011
+
+Dikembangkan sebagai latihan dalam membangun aplikasi CRUD dinamis berbasis web dengan PHP Native.
+
+## 📝 Lisensi
+
+Aplikasi ini dibuat untuk keperluan edukasi dan pembelajaran.
+
+## 🐛 Troubleshooting
+
+### Error: Connection refused
+- Pastikan MySQL service sudah berjalan
+- Cek kredensial database di `config/database.php`
+
+### Error: 404 Not Found
+- Pastikan path URL sesuai dengan lokasi folder
+- Gunakan `http://localhost/nama-folder/public/` bukan `http://localhost/nama-folder/`
+
+### Error: Function not found
+- Pastikan PHP PDO extension sudah aktif
+- Cek `php.ini` dan uncomment `extension=pdo_mysql`
+
+### Error: CSS tidak muncul
+- Periksa path file `assets/style.css`
+- Pastikan file CSS berada di folder `public/assets/`
+
+
+
+**Selamat menggunakan Aplikasi Destinasi Wisata! 🎉**
+
 
